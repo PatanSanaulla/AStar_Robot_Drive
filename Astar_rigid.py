@@ -1,21 +1,24 @@
 import sys
 import math
 import time
-from MapInfo import *
+import matplotlib.pyplot as plt
 
+# from MapInfo import *
+MAX_X = 500
+MAX_Y = 500
 # Global Variables
 START_POINT = []  # [x, y]
 GOAL_POINT = []  # [x, y]
-EXPLORED = []
-VISITED = []
+EXPLORED = {}  # [] # x,y,theta and Index
 RADIUS = 0  # Default Radius
-THRESHOLD = 0.5
 STEP_OBJECT_LIST = []
-COST_MAP_DICT = {}
+COST_MAP_DICT = {} # Index and Cost
 STEP_SIZE = 1  # Default step size
-THETA = math.pi / 6  # Default 30 degrees
-r = 0.038
-L = 0.354
+r = 3.8  # 0.038
+L = 35.4  # 0.354
+
+def isValidStep(newPosition, clear):
+    return True
 
 
 # Definition of Class Step:
@@ -30,61 +33,33 @@ class Step:
         self.position = position  # [x, y]
         self.parent = parent
         self.angle = angle  # angle % (2 * math.pi)
-        self.xPoint = int(position[0] / THRESHOLD) - 1
-        self.yPoint = int(position[1] / THRESHOLD) - 1
-        self.anglePoint = int((math.ceil(angle) % math.pi) / THETA)  # (int(angle/THETA)%12)-1
-        # self.costMapIndex = len(COST_MAP)
         if parent == None:
             self.costToCome = 0.0
         else:
-            self.costToCome = parent.costToCome + 1 # cost
-        self.cost = self.costToCome + 2 * float(
+            self.costToCome = parent.costToCome + abs((parent.position[0]-position[0])**2 - (parent.position[1]-position[1])**2) ** 0.5  # cost
+        self.cost = self.costToCome + float(
             ((GOAL_POINT[0] - self.position[0]) ** 2 + (GOAL_POINT[1] - self.position[1]) ** 2) ** (
                 0.5))  # Euclidean Distance
         print("creating a new step with", position, "and angle: ", angle, "and cost", self.cost)
         self.addToGraph()
 
-    def __lt__(self, other):
-        return self.cost < other.cost
-
     def addToGraph(self):
-        # if not self.isVisited():
-        #     self.visitStep()
-            EXPLORED.append(self)
+        key = str(self.position[0]) + "," + str(self.position[1]) + "," + str(self.angle)
+        value = EXPLORED.get(key)
+        if value == None:  # Not Visited
+            EXPLORED.update({key: len(STEP_OBJECT_LIST)})
+            COST_MAP_DICT.update({len(STEP_OBJECT_LIST): self.cost})
             STEP_OBJECT_LIST.append(self)
-
         # else:
-        #     # it is visited hence finding its cost and current index
-        #     pointKeys = list(COST_MAP_DICT.keys())
-        #     costValues = list(COST_MAP_DICT.values())
-        #     index = pointKeys.index((self.xPoint, self.yPoint, self.anglePoint))
-        #     if self.cost < costValues[index]:
-        #         try:
-        #             EXPLORED.remove(STEP_OBJECT_LIST[index])
-        #         except:
-        #             pass  # not present to remove form the list
-        #         self.visitStep()
-        #         EXPLORED.append(self)
-
-    def isVisited(self):
-        if VISITED[self.xPoint][self.yPoint][self.anglePoint] == 0:
-            return False
-        else:
-            return True
-
-    def visitStep(self):
-        VISITED[self.xPoint][self.yPoint][self.anglePoint] = 1
-        COST_MAP_DICT[(self.xPoint, self.yPoint, self.anglePoint)] = self.cost
+        #     if self.cost < STEP_OBJECT_LIST[value].cost: # COST_MAP_DICT.get(value):
+        #         EXPLORED.update({key: len(STEP_OBJECT_LIST)})
+        #         COST_MAP_DICT.update({len(STEP_OBJECT_LIST): self.cost})
+        #         STEP_OBJECT_LIST.append(self)
 
     def generateSteps(self):
-        # EXPLORED.append(self)
-        # for i in [-30, -(math.pi / 6), 0, (math.pi / 6), (math.pi / 3)]:
-        #     angle = i + self.angle
-        #     newX = thresholding((math.cos(angle) * STEP_SIZE) + self.position[0])
-        #     newY = thresholding((math.sin(angle) * STEP_SIZE) + self.position[1])
         for move in MOVES_LIST:
             t = 0
-            dt = 1 #0.1
+            dt = 1  # 0.1
             newX = self.position[0]
             newY = self.position[1]
             newAngle = 3.14 * self.angle / 180
@@ -94,15 +69,18 @@ class Step:
             # Xn, Yn, Thetan: End point coordintes
             while t < 1:
                 t = t + dt
-                # Xs = newX
-                # Ys = newY
-                newX += r * (move[0] + move[1]) * math.cos(newAngle) * dt
-                newY += r * (move[0] + move[1]) * math.sin(newAngle) * dt
+                Xs = self.position[0] # to remove
+                Ys = self.position[1] # to remove
+                newX += (r * 0.5) * (move[0] + move[1]) * math.cos(newAngle) * dt
+                newY += (r * 0.5) * (move[0] + move[1]) * math.sin(newAngle) * dt
                 newAngle += (r / L) * (move[0] - move[1]) * dt
-                #plt.plot([Xs, Xn], [Ys, Yn], color="blue")
-                
-                newAngle = 180 * newAngle / 3.14
-                newPosition = [newX, newY]
+
+                plt.plot([Xs, newX], [Ys, newY], color="blue")
+
+                newAngle = thresholding(180 * newAngle / 3.14)
+                if newAngle < 0:
+                    newAngle = newAngle + 360
+                newPosition = [thresholding(newX), thresholding(newY)]
                 if newX >= -MAX_X and newX <= MAX_X and newY >= -MAX_Y and newY <= MAX_Y and (
                         isValidStep(newPosition, RADIUS + CLEARANCE) == True):
                     try:
@@ -124,9 +102,16 @@ def backtrack(stepObj):
     pathValues.append([stepObj.position[0], stepObj.position[1], stepObj.angle])
 
     pathValues.reverse()
+    x = []
+    y = []
+    for each in pathValues:
+        x.append(each[0])
+        y.append(each[1])
+    plt.plot(x, y, color="red")
     print("length of step_object_list", len(STEP_OBJECT_LIST))
     print("length of the pathvalues", len(pathValues))
-    showPath(START_POINT, GOAL_POINT, STEP_OBJECT_LIST, pathValues)
+    print(pathValues)
+    #showPath(START_POINT, GOAL_POINT, STEP_OBJECT_LIST, pathValues)
 
 
 def inGoal(position):
@@ -185,35 +170,37 @@ else:
 
 # To check if both the values are possible to work with in the puzzle
 if isPossible == 2:
-    
-
-    VISITED = [[[0 for i in range(int(2 * math.pi / THETA))] for j in range(int(MAX_Y / THRESHOLD))] for k in
-               range(int(MAX_X / THRESHOLD))]
-
-    root = Step(None, START_POINT[:2], START_POINT[2]) # Starting the linked list with start point as the root
+    fig, ax = plt.subplots()
+    root = Step(None, START_POINT[:2], START_POINT[2])  # Starting the linked list with start point as the root
 
     start_time = time.time()
     while True:  # to keep traversing until the goal area is found
-        eachStep = EXPLORED.pop(0)
-        # print(eachStep.position, math.degrees(eachStep.angle))
-        eachStep.generateSteps()
-        EXPLORED.sort()
-        break
-
-        if inGoal(eachStep.position) == True:
+        topKey = next(iter(COST_MAP_DICT))
+        COST_MAP_DICT.pop(topKey)
+        poppedStep = STEP_OBJECT_LIST[topKey]
+        if inGoal(poppedStep.position) == True:
             break
+        else:
+            poppedStep.generateSteps()
+            COST_MAP_DICT = {index: totalcost for index, totalcost in sorted(COST_MAP_DICT.items(), key=lambda cost: cost[1])} # EXPLORED.sort()
+
     end_time = time.time()
-    # while True:
-    #	eachStep = STEP_OBJECT_LIST.pop(0) #to Keep popping until a unvisted node is found
-    #	if eachStep.isVisited() == False:
-    #		break
 
-    print("Total Cost to reach the final Point:", eachStep.costToCome)
-    # stepsTakenToCompute() #Once the whole generation is completed begin the animation
+    print("Total Cost to reach the final Point:", poppedStep.costToCome)
 
-    # now = datetime.now().time()
     print("total time for A star in seconds: ", end_time - start_time)
-    # backtrack(eachStep)  # To show the backtrack on the graph
+    backtrack(poppedStep)  # To show the backtrack on the graph
+    plt.grid()
+
+    ax.set_aspect('equal')
+
+    plt.xlim(-50, 50)
+    plt.ylim(-50, 50)
+
+    plt.title('How to plot a vector in matplotlib ?', fontsize=10)
+
+    plt.show()
+    plt.close()
 
 else:
     print("Exiting the Algorithm")
