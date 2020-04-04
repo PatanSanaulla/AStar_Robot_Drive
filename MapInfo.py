@@ -10,8 +10,9 @@ import math
 import cv2
 import glob
 
-MAX_X = 5
-MAX_Y = 5
+MAX_X = 500
+MAX_Y = 500
+stretch = 1
 
 def solveLine(obsCoords1, obsCoords2, x, y):
     x1 = obsCoords1[0]
@@ -30,34 +31,34 @@ def solveLine(obsCoords1, obsCoords2, x, y):
     return slope
 
 
-plotSquare1 = np.array([(-3.25, 0.75), (-4.75, 0.75), (-4.75, -0.75), (-3.25, -0.75)], dtype='float')
-plotSquare2 = np.array([(3.25, 0.75), (4.75, 0.75), (4.75, -0.75), (3.25, -0.75)], dtype='float')
-plotSquare3 = np.array([(-2.75, 3.75), (-1.25, 3.75), (-1.25, 2.25), (-2.75, 2.25)], dtype='float')
+plotSquare1 = np.array([(-325, 75), (-475, 75), (-475, -75), (-325, -75)], dtype='float')
+plotSquare2 = np.array([(325, 75), (475, 75), (475, -75), (325, -75)], dtype='float')
+plotSquare3 = np.array([(-275, 375), (-125, 375), (-125, 225), (-275, 225)], dtype='float')
 
 plotCircle1 = [(1), (0, 0)]
-plotCircle2 = [(1), (-2, -3)]
-plotCircle3 = [(1), (2, -3)]
-plotCircle4 = [(1), (2, 3)]
+plotCircle2 = [(1), (-200, -300)]
+plotCircle3 = [(1), (200, -300)]
+plotCircle4 = [(1), (200, 300)]
 
-square1Coords = np.array([(-3.25 - stretch, 0.75 + stretch), (-4.75 + stretch, 0.75 + stretch), (100 + stretch, 38.6 - stretch), (95 - stretch, 30 - stretch)], dtype='int')
-square2Coords = np.array([(30 - stretch, 67.5 + stretch), (35 + stretch, 76 + stretch), (100 + stretch, 38.6 - stretch), (95 - stretch, 30 - stretch)], dtype='int')
-square3Coords = np.array([(30 - stretch, 67.5 + stretch), (35 + stretch, 76 + stretch), (100 + stretch, 38.6 - stretch), (95 - stretch, 30 - stretch)], dtype='int')
+square1Coords = np.array([(-325 - stretch, 75 + stretch), (-475 + stretch, 75 + stretch), (-475 + stretch, -75 - stretch), (-3.25 - stretch, -0.75 - stretch)], dtype='int')
+square2Coords = np.array([(325 - stretch, 75 + stretch), (475 + stretch, 75 + stretch), (475 + stretch, -75 - stretch), (325 - stretch, -75 - stretch)], dtype='int')
+square3Coords = np.array([(-275 - stretch, 375 + stretch), (-125 + stretch, 375 + stretch), (-125 + stretch, 225 - stretch), (-275 - stretch, 225 - stretch)], dtype='int')
 
 
 def circleOne(x, y):
-    if ((x - 0) ** 2 + (y - 0) ** 2 - 1 ** 2) <= 0:
+    if ((x - 0) ** 2 + (y - 0) ** 2 - 1 ** 200) <= 0:
         return False
     else:
         return True
 
 def circleTwo(x, y):
-    if ((x - (-2)) ** 2 + (y - (-3)) ** 2 - 1 ** 2) <= 0:
+    if ((x - (-2)) ** 2 + (y - (-3)) ** 2 - 1 ** 200) <= 0:
         return False
     else:
         return True
 
 def circleThree(x, y):
-    if ((x - 2) ** 2 + (y - (-3)) ** 2 - 1 ** 2) <= 0:
+    if ((x - 2) ** 2 + (y - (-3)) ** 2 - 1 ** 200) <= 0:
         return False
     else:
         return True
@@ -68,7 +69,7 @@ def circleFour(x, y):
     else:
         return True
 
-def squareOne():
+def squareOne(x, y, square1Coords):
     planeSquare1 = []
     for i in range(len(square1Coords)):
         if i == len(square1Coords) - 1:
@@ -82,28 +83,28 @@ def squareOne():
         flag = True
         return flag
 
-def squareTwo():
+def squareTwo(x, y, square2Coords):
     planeSquare2 = []
-    for i in range(len(rectangleCoords)):
-        if i == len(rectangleCoords) - 1:
-            planeRectangle.append(solveLine(rectangleCoords[i], rectangleCoords[0], x, y))
+    for i in range(len(square2Coords)):
+        if i == len(square2Coords) - 1:
+            planeSquare2.append(solveLine(square2Coords[i], square2Coords[0], x, y))
             break
-        planeRectangle.append(solveLine(rectangleCoords[i], rectangleCoords[i + 1], x, y))
-    if (planeRectangle[0] <= 0 and planeRectangle[1] <= 0 and planeRectangle[2] >= 0 and planeRectangle[3] >= 0):
+        planeSquare2.append(solveLine(square2Coords[i], square2Coords[i + 1], x, y))
+    if (planeSquare2[0] <= 0 and planeSquare2[1] <= 0 and planeSquare2[2] >= 0 and planeSquare2[3] >= 0):
         flag = False
         return flag
     else:
         flag = True
         return flag
     
-def squareThree():
+def squareThree(x, y, square3Coords):
     planeSquare3 = []
-    for i in range(len(rectangleCoords)):
-        if i == len(rectangleCoords) - 1:
-            planeRectangle.append(solveLine(rectangleCoords[i], rectangleCoords[0], x, y))
+    for i in range(len(square3Coords)):
+        if i == len(square3Coords) - 1:
+            planeSquare3.append(solveLine(square3Coords[i], square3Coords[0], x, y))
             break
-        planeRectangle.append(solveLine(rectangleCoords[i], rectangleCoords[i + 1], x, y))
-    if (planeRectangle[0] <= 0 and planeRectangle[1] <= 0 and planeRectangle[2] >= 0 and planeRectangle[3] >= 0):
+        planeSquare3.append(solveLine(square3Coords[i], square3Coords[i + 1], x, y))
+    if (planeSquare3[0] <= 0 and planeSquare3[1] <= 0 and planeSquare3[2] >= 0 and planeSquare3[3] >= 0):
         flag = False
         return flag
     else:
@@ -155,3 +156,4 @@ def showPath():
     
 showPath()
 print(circleOne(0, 0))
+print(squareOne(0,0, square1Coords))
