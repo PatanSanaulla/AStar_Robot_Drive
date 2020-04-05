@@ -1,25 +1,18 @@
 import sys
 import math
 import time
-import matplotlib.pyplot as plt
+from MapInfo import *
 
-# from MapInfo import *
-MAX_X = 500
-MAX_Y = 500
 # Global Variables
-START_POINT = []  # [x, y]
-GOAL_POINT = []  # [x, y]
-EXPLORED = {}  # [] # x,y,theta and Index
-RADIUS = 0  # Default Radius
+START_POINT = []        # [x, y]
+GOAL_POINT = []         # [x, y]
+EXPLORED = {}           # x,y,theta and Index
+RADIUS = 0              # Default Radius
 STEP_OBJECT_LIST = []
-COST_MAP_DICT = {} # Index and Cost
-STEP_SIZE = 1  # Default step size
-r = 3.8  # 0.038
-L = 35.4  # 0.354
-
-def isValidStep(newPosition, clear):
-    return True
-
+COST_MAP_DICT = {}      # Index and Cost
+STEP_SIZE = 1           # Default step size
+r = 3.8                 # 0.038
+L = 35.4                # 0.354
 
 # Definition of Class Step:
 class Step:
@@ -59,7 +52,7 @@ class Step:
     def generateSteps(self):
         for move in MOVES_LIST:
             t = 0
-            dt = 1  # 0.1
+            dt = 0.1  # 0.1
             newX = self.position[0]
             newY = self.position[1]
             newAngle = 3.14 * self.angle / 180
@@ -75,8 +68,6 @@ class Step:
                 newY += (r * 0.5) * (move[0] + move[1]) * math.sin(newAngle) * dt
                 newAngle += (r / L) * (move[0] - move[1]) * dt
 
-                plt.plot([Xs, newX], [Ys, newY], color="blue")
-
                 newAngle = thresholding(180 * newAngle / 3.14)
                 if newAngle < 0:
                     newAngle = newAngle + 360
@@ -87,9 +78,11 @@ class Step:
                         if (self.parent.position == newPosition):
                             pass
                         else:
-                            newStep = Step(self, newPosition, newAngle)  # cost 1.0
+                            plt.plot([Xs, newX], [Ys, newY], color="blue")
+                            newStep = Step(self, newPosition, newAngle)
                     except AttributeError:
-                        newStep = Step(self, newPosition, newAngle)  # cost 1.0
+                        plt.plot([Xs, newX], [Ys, newY], color="blue")
+                        newStep = Step(self, newPosition, newAngle)
                 else:
                     pass
 
@@ -108,10 +101,10 @@ def backtrack(stepObj):
         x.append(each[0])
         y.append(each[1])
     plt.plot(x, y, color="red")
+    showPath()
     print("length of step_object_list", len(STEP_OBJECT_LIST))
     print("length of the pathvalues", len(pathValues))
     print(pathValues)
-    #showPath(START_POINT, GOAL_POINT, STEP_OBJECT_LIST, pathValues)
 
 
 def inGoal(position):
@@ -170,7 +163,6 @@ else:
 
 # To check if both the values are possible to work with in the puzzle
 if isPossible == 2:
-    fig, ax = plt.subplots()
     root = Step(None, START_POINT[:2], START_POINT[2])  # Starting the linked list with start point as the root
 
     start_time = time.time()
@@ -190,17 +182,6 @@ if isPossible == 2:
 
     print("total time for A star in seconds: ", end_time - start_time)
     backtrack(poppedStep)  # To show the backtrack on the graph
-    plt.grid()
-
-    ax.set_aspect('equal')
-
-    plt.xlim(-50, 50)
-    plt.ylim(-50, 50)
-
-    plt.title('How to plot a vector in matplotlib ?', fontsize=10)
-
-    plt.show()
-    plt.close()
 
 else:
     print("Exiting the Algorithm")
