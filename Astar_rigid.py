@@ -7,12 +7,12 @@ from MapInfo import *
 START_POINT = []        # [x, y]
 GOAL_POINT = []         # [x, y]
 EXPLORED = {}           # x,y,theta and Index
-RADIUS = 0              # Default Radius
+RADIUS = 1              # Default Radius 105mm
 STEP_OBJECT_LIST = []
 COST_MAP_DICT = {}      # Index and Cost
 STEP_SIZE = 1           # Default step size
-r = 3.8                 # 0.038
-L = 35.4                # 0.354
+r = 3.3                 # 0.038 3.8
+L = 16.0                # 0.354 35.4
 
 # Definition of Class Step:
 class Step:
