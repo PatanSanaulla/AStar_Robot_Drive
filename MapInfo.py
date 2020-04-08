@@ -1,144 +1,118 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
-import matplotlib.animation as animation
-from matplotlib.animation import FuncAnimation
+# from matplotlib.patches import Ellipse
+# import matplotlib.animation as animation
+# from matplotlib.animation import FuncAnimation
 from matplotlib.font_manager import FontProperties
-import matplotlib.lines as mlines
+
+# import matplotlib.lines as mlines
 plt.style.use('seaborn-pastel')
 import numpy as np
-import math
-import cv2
-import glob
+
+# import math
+# import cv2
+# import glob
 
 MAX_X = 500
 MAX_Y = 500
-stretch = 1
-
-def solveLine(obsCoords1, obsCoords2, x, y):
-    x1 = obsCoords1[0]
-    y1 = obsCoords1[1]
-
-    x2 = obsCoords2[0]
-    y2 = obsCoords2[1]
-
-    if y1 == y2:
-        slope = y - y2
-        return slope
-    if x1 == x2:
-        slope = x - x2
-        return slope
-    slope = (y - y2) - ((x - x2) * (y1 - y2)) / (x1 - x2)
-    return slope
-
 
 plotSquare1 = np.array([(-325, 75), (-475, 75), (-475, -75), (-325, -75)], dtype='float')
 plotSquare2 = np.array([(325, 75), (475, 75), (475, -75), (325, -75)], dtype='float')
 plotSquare3 = np.array([(-275, 375), (-125, 375), (-125, 225), (-275, 225)], dtype='float')
 
-plotCircle1 = [(1), (0, 0)]
-plotCircle2 = [(1), (-200, -300)]
-plotCircle3 = [(1), (200, -300)]
-plotCircle4 = [(1), (200, 300)]
+plotCircle1 = [(100), (0, 0)]
+plotCircle2 = [(100), (-200, -300)]
+plotCircle3 = [(100), (200, -300)]
+plotCircle4 = [(100), (200, 300)]
 
-square1Coords = np.array([(-325 - stretch, 75 + stretch), (-475 + stretch, 75 + stretch), (-475 + stretch, -75 - stretch), (-3.25 - stretch, -0.75 - stretch)], dtype='int')
-square2Coords = np.array([(325 - stretch, 75 + stretch), (475 + stretch, 75 + stretch), (475 + stretch, -75 - stretch), (325 - stretch, -75 - stretch)], dtype='int')
-square3Coords = np.array([(-275 - stretch, 375 + stretch), (-125 + stretch, 375 + stretch), (-125 + stretch, 225 - stretch), (-275 - stretch, 225 - stretch)], dtype='int')
+fig = plt.figure()
+fig.set_dpi(100)
+fig.set_size_inches(8.5, 6)
+fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+# xTracepoint1 = []
+# yTracepoint2 = []
+#
+# yTracepoint1 = []
+# xTracepoint2 = []
+#
+# xTrackpoint1 = []
+# yTrackpoint1 = []
+#
+# xTrackpoint2 = []
+# yTrackpoint2 = []
+
+imageList = []
+
+axis = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-MAX_X, MAX_X), ylim=(-MAX_Y, MAX_Y))
+font = FontProperties()
+font.set_family('serif')
+font.set_name('Times New Roman')
+font.set_style('italic')
+axis.set_xlabel('x coordinate', fontproperties=font)
+axis.set_ylabel('y coordinate', fontproperties=font)
 
 
-def circleOne(x, y):
-    if ((x - 0) ** 2 + (y - 0) ** 2 - 1 ** 200) <= 0:
+def circleOne(x, y, clearance):
+    if ((x - 0) ** 2 + (y - 0) ** 2 - (100 + clearance) ** 2) <= 0:
         return False
     else:
         return True
 
-def circleTwo(x, y):
-    if ((x - (-2)) ** 2 + (y - (-3)) ** 2 - 1 ** 200) <= 0:
+
+def circleTwo(x, y, clearance):
+    if ((x - (-200)) ** 2 + (y - (-300)) ** 2 - (100 + clearance) ** 2) <= 0:
         return False
     else:
         return True
 
-def circleThree(x, y):
-    if ((x - 2) ** 2 + (y - (-3)) ** 2 - 1 ** 200) <= 0:
+
+def circleThree(x, y, clearance):
+    if ((x - 200) ** 2 + (y - (-300)) ** 2 - (100 + clearance) ** 2) <= 0:
         return False
     else:
         return True
 
-def circleFour(x, y):
-    if ((x - 2) ** 2 + (y - 3) ** 2 - 1 ** 2) <= 0:
+
+def circleFour(x, y, clearance):
+    if ((x - 200) ** 2 + (y - 300) ** 2 - (100 + clearance) ** 2) <= 0:
         return False
     else:
         return True
 
-def squareOne(x, y, square1Coords):
-    planeSquare1 = []
-    for i in range(len(square1Coords)):
-        if i == len(square1Coords) - 1:
-            planeSquare1.append(solveLine(square1Coords[i], square1Coords[0], x, y))
-            break
-        planeSquare1.append(solveLine(square1Coords[i], square1Coords[i + 1], x, y))
-    if (planeSquare1[0] <= 0 and planeSquare1[1] <= 0 and planeSquare1[2] >= 0 and planeSquare1[3] >= 0):
-        flag = False
-        return flag
-    else:
-        flag = True
-        return flag
 
-def squareTwo(x, y, square2Coords):
-    planeSquare2 = []
-    for i in range(len(square2Coords)):
-        if i == len(square2Coords) - 1:
-            planeSquare2.append(solveLine(square2Coords[i], square2Coords[0], x, y))
-            break
-        planeSquare2.append(solveLine(square2Coords[i], square2Coords[i + 1], x, y))
-    if (planeSquare2[0] <= 0 and planeSquare2[1] <= 0 and planeSquare2[2] >= 0 and planeSquare2[3] >= 0):
-        flag = False
-        return flag
+def squareOne(x, y, clearance):
+    if (y >= -75 - clearance) and (y <= 75 + clearance) and (x >= -475 - clearance) and (x <= -375 + clearance):
+        return False
     else:
-        flag = True
-        return flag
-    
-def squareThree(x, y, square3Coords):
-    planeSquare3 = []
-    for i in range(len(square3Coords)):
-        if i == len(square3Coords) - 1:
-            planeSquare3.append(solveLine(square3Coords[i], square3Coords[0], x, y))
-            break
-        planeSquare3.append(solveLine(square3Coords[i], square3Coords[i + 1], x, y))
-    if (planeSquare3[0] <= 0 and planeSquare3[1] <= 0 and planeSquare3[2] >= 0 and planeSquare3[3] >= 0):
-        flag = False
-        return flag
+        return True
+
+
+def squareTwo(x, y, clearance):
+    if (y >= -75 - clearance) and (y <= 75 + clearance) and (x >= 375 - clearance) and (x <= 475 + clearance):
+        return False
     else:
-        flag = True
-        return flag
+        return True
+
+
+def squareThree(x, y, clearance):
+    if (y >= 225 - clearance) and (y <= 375 + clearance) and (x >= -275 - clearance) and (x <= -125 + clearance):
+        return False
+    else:
+        return True
+
+
+def isValidStep(position, clearance):
+    x = position[0]
+    y = position[1]
+    if circleOne(x, y, clearance) and circleTwo(x, y, clearance) and circleThree(x, y, clearance) and circleFour(x, y,
+                                                                                                                 clearance) and squareOne(
+            x, y, clearance) and squareTwo(x, y, clearance) and squareThree(x, y, clearance):
+        return True
+    else:
+        return False
+
 
 def showPath():
-    fig = plt.figure()
-    fig.set_dpi(100)
-    fig.set_size_inches(8.5, 6)
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
-
-    xTracepoint1 = []
-    yTracepoint2 = []
-
-    yTracepoint1 = []
-    xTracepoint2 = []
-
-    xTrackpoint1 = []
-    yTrackpoint1 = []
-
-    xTrackpoint2 = []
-    yTrackpoint2 = []
-
-    imageList = []
-
-    axis = fig.add_subplot(111, aspect = 'equal', autoscale_on = False, xlim = (-MAX_X,MAX_X), ylim = (-MAX_Y, MAX_Y))
-    #axis = plt.axes(xlim=(0, MAX_X), ylim=(0, MAX_Y))
-    font = FontProperties()
-    font.set_family('serif')
-    font.set_name('Times New Roman')
-    font.set_style('italic')
-    axis.set_xlabel('x coordinate',  fontproperties = font)
-    axis.set_ylabel('y coordinate', fontproperties = font)
     count = 0
     circle1 = plt.Circle((plotCircle1[1]), plotCircle1[0], fc=None)
     circle2 = plt.Circle((plotCircle2[1]), plotCircle2[0], fc=None)
@@ -148,12 +122,8 @@ def showPath():
     square2 = plt.Polygon(plotSquare2)
     square3 = plt.Polygon(plotSquare3)
     obstacles = [circle1, circle2, circle3, circle4, square1, square2, square3]
-    
+
     for item in obstacles:
         axis.add_patch(item)
-    
+
     plt.show()
-    
-showPath()
-print(circleOne(0, 0))
-print(squareOne(0,0, square1Coords))
