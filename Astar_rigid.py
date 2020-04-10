@@ -103,6 +103,7 @@ def backtrack(stepObj):
         y.append(each[1])
     plt.plot(x, y, color="red")
     showPath()
+    showPath(STEP_OBJECT_LIST, pathValues)
     print("length of step_object_list", len(STEP_OBJECT_LIST))
     print("length of the pathvalues", len(pathValues))
     print(pathValues)
