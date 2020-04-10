@@ -7,12 +7,11 @@ from MapInfo import *
 START_POINT = []        # [x, y]
 GOAL_POINT = []         # [x, y]
 EXPLORED = {}           # x,y,theta and Index
-RADIUS = 0              # Default Radius
+RADIUS = 10.5              # Default Radius 105mm
 STEP_OBJECT_LIST = []
 COST_MAP_DICT = {}      # Index and Cost
-STEP_SIZE = 1           # Default step size
-r = 3.8                 # 0.038
-L = 35.4                # 0.354
+r = 3.3                 # 0.038 3.8
+L = 16.0                # 0.354 35.4
 
 # Definition of Class Step:
 class Step:
@@ -71,6 +70,8 @@ class Step:
                 newAngle = thresholding(180 * newAngle / 3.14)
                 if newAngle < 0:
                     newAngle = newAngle + 360
+                if newAngle > 360:
+                    newAngle = newAngle % 360
                 newPosition = [thresholding(newX), thresholding(newY)]
                 if newX >= -MAX_X and newX <= MAX_X and newY >= -MAX_Y and newY <= MAX_Y and (
                         isValidStep(newPosition, RADIUS + CLEARANCE) == True):
