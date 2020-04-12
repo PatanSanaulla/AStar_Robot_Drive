@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+from matplotlib.patches import Rectangle
 import cv2
 
 # import matplotlib.lines as mlines
@@ -22,43 +23,13 @@ plotCircle2 = [(100), (-200, -300)]
 plotCircle3 = [(100), (200, -300)]
 plotCircle4 = [(100), (200, 300)]
 
+plotBorderWall = np.array([(-510, 510), (510, 510),(510, -510),(-510, -510)], dtype = 'float')
+
 fig = plt.figure()
-fig.set_dpi(100)
-fig.set_size_inches(8.5, 6)
-fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+fig.set_dpi(300)
+plt.axis('off')
 
-axis = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-MAX_X, MAX_X), ylim=(-MAX_Y, MAX_Y))
-font = FontProperties()
-font.set_family('serif')
-font.set_name('Times New Roman')
-font.set_style('italic')
-axis.set_xlabel('x coordinate', fontproperties=font)
-axis.set_ylabel('y coordinate', fontproperties=font)
-
-axis.spines["top"].set_linewidth(2)
-axis.spines["top"].set_capstyle("round")
-axis.spines["bottom"].set_linewidth(2)
-axis.spines["bottom"].set_capstyle("round")
-axis.spines["left"].set_linewidth(2)
-axis.spines["left"].set_capstyle("round")
-axis.spines["right"].set_linewidth(2)
-axis.spines["right"].set_capstyle("round")
-
-def solveLine(obsCoords1, obsCoords2, x, y):
-    x1 = obsCoords1[0]
-    y1 = obsCoords1[1]
-
-    x2 = obsCoords2[0]
-    y2 = obsCoords2[1]
-
-    if y1 == y2:
-        line = y - y2
-        return line
-    if x1 == x2:
-        line = x - x2
-        return line
-    line = (y - y2) - ((x - x2) * (y1 - y2)) / (x1 - x2)
-    return line
+axis = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-(MAX_X+50), MAX_X+50), ylim=(-(MAX_Y+50), MAX_Y+50))
 
 def circleOne(x, y, clearance):
     if ((x - 0) ** 2 + (y - 0) ** 2 - (100 + clearance) ** 2) <= 0:
@@ -128,11 +99,13 @@ def showPath(STEP_OBJECT_LIST, pathValues):
     square1 = plt.Polygon(plotSquare1)
     square2 = plt.Polygon(plotSquare2)
     square3 = plt.Polygon(plotSquare3)
+    borderWall = plt.Polygon(plotBorderWall, fill=None)
     obstacles = [circle1, circle2, circle3, circle4, square1, square2, square3]
 
     for item in obstacles:
         axis.add_patch(item)
-    #
+        axis.add_patch(borderWall)
+
     # xTracepoint1 = []
     # yTracepoint2 = []
     #
@@ -147,7 +120,7 @@ def showPath(STEP_OBJECT_LIST, pathValues):
     #
     # imageList = []
     #
-    # framerate = 50
+    # framerate = 30
     # for itr in range(1, len(STEP_OBJECT_LIST)):
     #     try:
     #         startTrace = STEP_OBJECT_LIST[itr * framerate].parent
@@ -156,7 +129,7 @@ def showPath(STEP_OBJECT_LIST, pathValues):
     #         xTracepoint2 = STEP_OBJECT_LIST[itr * framerate].position[0] - startTrace.position[0]
     #         yTracepoint2 = STEP_OBJECT_LIST[itr * framerate].position[1] - startTrace.position[1]
     #         axis.quiver(xTracepoint1, yTracepoint1, xTracepoint2, yTracepoint2, units='xy', scale=1, color='blue')
-    #         plt.savefig("./images/frame" + str(count) + ".png", dpi = 200)
+    #         plt.savefig("./images/frame" + str(count) + ".png", dpi = 500, quality = 80)
     #         imageList.append("images/frame" + str(count) + ".png")
     #         # print(len(STEP_OBJECT_LIST))
     #         print("count:", count)
@@ -171,17 +144,17 @@ def showPath(STEP_OBJECT_LIST, pathValues):
     #         xTrackpoint2 = pathValues[itr + 1][0] - pathValues[itr][0]
     #         yTrackpoint2 = pathValues[itr + 1][1] - pathValues[itr][1]
     #         axis.quiver(xTrackpoint1, yTrackpoint1, xTrackpoint2, yTrackpoint2, units='xy', scale=1, color='red')
-    #         plt.savefig("./images/frame" + str(count) + ".png", dpi=200)
+    #         plt.savefig("./images/frame" + str(count) + ".png", dpi = 500)
     #         imageList.append("images/frame" + str(count) + ".png")
     #         print("count:", count)
     #         count = count + 1
     #     except:
     #         break
     #
-    # output = cv2.VideoWriter("Simulation_Video.avi", cv2.VideoWriter_fourcc(*'XVID'), 20.0, (500, 300))
+    # output = cv2.VideoWriter("Simulation_Video.avi", cv2.VideoWriter_fourcc(*'XVID'), 20.0, (1280, 720))
     # for image in imageList:
     #     display = cv2.imread(image)
-    #     display = cv2.resize(display, (500, 300))
+    #     display = cv2.resize(display, (1280, 720))
     #     output.write(display)
     # output.release()
 
